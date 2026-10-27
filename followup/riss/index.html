@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light only">
 <link rel="icon" href="data:,">
-<title>RISS 클로드 연결</title>
-<meta name="description" content="RISS 검색 API 키를 받아 클로드 코드(또는 코덱스)에 연결하고, 주제를 검색해 문헌 목록 CSV를 만드는 10단계 안내.">
+<title>RISS 문헌 검색</title>
+<meta name="description" content="RISS 검색 API 키를 받아 환경 변수로 안전하게 보관하고, 클로드 코드에게 주제 검색과 문헌 목록 CSV 만들기를 부탁하는 9단계 안내.">
 <link rel="stylesheet" href="../asset/guide.css">
 </head>
 <body>
@@ -18,24 +18,23 @@
 <main class="wrap">
 <header class="hero">
   <p class="kicker">따라 하기 ②</p>
-  <h1>RISS 문헌 검색을<br>클로드 코드에 연결하기</h1>
-  <p class="lead">RISS 검색 API 키를 받아 클로드 코드에 연결하고, '교육청'과 '장학사'를 다룬 문헌을 찾아 목록을 CSV 파일로 만듭니다. 코덱스(ChatGPT)도 같은 방식으로 연결합니다.</p>
-  <p class="meta">준비: <a href="../#prep-a">클로드 코드와 uv 설치, 폴더에서 터미널 여는 법</a> · 키 승인까지는 RISS 심사 기간이 따로 걸립니다</p>
+  <h1>RISS 문헌 검색을<br>클로드 코드에게 맡기기</h1>
+  <p class="lead">RISS 검색 API 키를 받아 안전하게 보관하고, 클로드 코드에게 '교육청'과 '장학사'를 다룬 문헌을 찾아 목록을 CSV 파일로 만들어 달라고 부탁합니다. 프로그램을 따로 설치하지 않고 말로 부탁합니다.</p>
+  <p class="meta">준비: <a href="../#prep-a">클로드 코드 설치, 폴더에서 터미널 여는 법</a> · 키 승인까지는 RISS 심사 기간이 따로 걸립니다</p>
 </header>
 
 <nav class="toc" aria-label="단계">
-  <h2>10단계</h2>
+  <h2>9단계</h2>
   <ol>
     <li><a href="#s1">무엇을 받아올 수 있나</a></li>
     <li><a href="#s2">신청 자격 확인</a></li>
     <li><a href="#s3">이용 신청서 쓰기</a></li>
-    <li><a href="#s4">브라우저로 키 시험하기</a></li>
-    <li><a href="#s5">도구 폴더 준비</a></li>
-    <li><a href="#s6">키가 되는지 확인</a></li>
-    <li><a href="#s7">클로드 코드에 연결</a></li>
-    <li><a href="#s8">문헌조사 폴더와 CLAUDE.md</a></li>
-    <li><a href="#s9">검색해서 목록 CSV 만들기</a></li>
-    <li><a href="#s10">코덱스와 웹에서는</a></li>
+    <li><a href="#s4">키 보안: 왜 조심해야 하나</a></li>
+    <li><a href="#s5">키를 환경 변수로 등록</a></li>
+    <li><a href="#s6">문헌조사 폴더와 CLAUDE.md</a></li>
+    <li><a href="#s7">키가 되는지 확인</a></li>
+    <li><a href="#s8">검색해서 목록 CSV 만들기</a></li>
+    <li><a href="#s9">코덱스와 웹에서는</a></li>
   </ol>
 </nav>
 
@@ -51,7 +50,19 @@
     <tr><td>연구보고서</td><td class="c"><code>F</code></td><td class="num">3,129</td><td></td></tr>
     <tr><td>학술지</td><td class="c"><code>S</code></td><td class="num">20</td><td>ISSN, 등재 여부</td></tr>
   </table></div>
-  <p><strong>공통 항목</strong>은 제목, 저자, 발행처, 발행연도, 상세 페이지 링크, 그리고 초록·목차·원문이 있는지(Y/N)입니다. 결과는 XML 형식으로 오고, 한 번에 최대 100건씩 받습니다.</p>
+  <p><strong>공통 항목</strong>은 제목, 저자, 발행처, 발행연도, 상세 페이지 링크, 그리고 초록·목차·원문이 있는지(Y/N)입니다. 결과는 아래 같은 XML 형식으로 오고, 한 번에 최대 100건씩 받습니다. <code>totalcount</code>가 전체 건수이고 <code>metadata</code> 하나가 논문 한 편입니다(실제 응답에서 한 건만 줄여 옮김).</p>
+  <div class="box"><span class="lab">응답 예 (일부)</span><pre>&lt;head&gt;
+&lt;totalcount&gt;16474&lt;/totalcount&gt;
+&lt;Error&gt;0&lt;/Error&gt;
+&lt;/head&gt;
+&lt;metadata&gt;
+&lt;riss.title&gt;수요자 중심 직업교육연수가 특수교사의 연수만족도와 직업교육효능감에 미치는 효과&lt;/riss.title&gt;
+&lt;riss.author&gt;이정은, 강영심, 정현지&lt;/riss.author&gt;
+&lt;riss.pubdate&gt;2014&lt;/riss.pubdate&gt;
+&lt;riss.stitle&gt;특수교육재활과학연구&lt;/riss.stitle&gt;
+&lt;riss.reg&gt;KCI등재&lt;/riss.reg&gt;
+&lt;url&gt;http://www.riss.kr/link?id=A106205814&lt;/url&gt;
+&lt;/metadata&gt;</pre></div>
   <div class="note warn"><b class="t">초록 본문은 오지 않습니다</b><p>API가 주는 것은 서지 정보와 링크까지입니다. 초록과 원문은 링크를 눌러 RISS에서 봅니다. 공개강의와 CALIS 자료는 발표자 키로는 '인증 오류'가 나서, 승인 범위에 따로 넣어야 하는 것으로 보입니다.</p></div>
 </section>
 
@@ -92,95 +103,86 @@
 </section>
 
 <section class="step" id="s4">
-  <h2><span class="n">4</span>브라우저로 키 시험하기</h2>
-  <p>아래 주소에서 <code>여기에_내_키</code>를 받은 키로 바꿔 브라우저 주소창에 넣습니다. 한글 검색어는 브라우저가 알아서 바꿔 보냅니다.</p>
-  <div class="box"><span class="lab">브라우저 주소창에 입력</span><pre>https://www.riss.kr/openApi?key=여기에_내_키&amp;version=1.0&amp;type=A&amp;keyword=직업교육&amp;rowcount=3</pre></div>
-  <p>키가 맞으면 이런 XML이 나옵니다(실제 응답에서 한 건만 줄여 옮김). <code>totalcount</code>가 전체 건수이고, <code>metadata</code> 하나가 논문 한 편입니다.</p>
-  <div class="box"><span class="lab">응답 (일부)</span><pre>&lt;record&gt;
-&lt;head&gt;
-&lt;totalcount&gt;16474&lt;/totalcount&gt;
-&lt;Error&gt;0&lt;/Error&gt;
-&lt;ErrorMessage&gt;No Error&lt;/ErrorMessage&gt;
-&lt;/head&gt;
-&lt;metadata&gt;
-&lt;riss.type&gt;A&lt;/riss.type&gt;
-&lt;riss.title&gt;수요자 중심 직업교육연수가 특수교사의 연수만족도와 직업교육효능감에 미치는 효과&lt;/riss.title&gt;
-&lt;riss.author&gt;이정은, 강영심, 정현지&lt;/riss.author&gt;
-&lt;riss.publisher&gt;대구대학교 특수교육재활과학연구소&lt;/riss.publisher&gt;
-&lt;riss.pubdate&gt;2014&lt;/riss.pubdate&gt;
-&lt;riss.stitle&gt;특수교육재활과학연구&lt;/riss.stitle&gt;
-&lt;riss.reg&gt;KCI등재&lt;/riss.reg&gt;
-&lt;riss.abstract&gt;Y&lt;/riss.abstract&gt;
-&lt;url&gt;http://www.riss.kr/link?id=A106205814&lt;/url&gt;
-&lt;/metadata&gt;
-&lt;/record&gt;</pre></div>
-  <p>키가 틀렸거나 승인 범위 밖의 자료 종류를 부르면 <code>&lt;Error&gt;004&lt;/Error&gt;</code>, <code>&lt;ErrorMessage&gt;인증 오류&lt;/ErrorMessage&gt;</code>가 나옵니다.</p>
-  <div class="note warn"><b class="t">주소창에 넣은 키도 조심</b><p>주소에 키가 그대로 들어가므로 이 화면을 캡처해 공유하지 않습니다. 시험이 끝나면 다음 단계처럼 키를 파일에 넣어 두고 씁니다.</p></div>
+  <h2><span class="n">4</span>키 보안: 왜 조심해야 하나</h2>
+  <p>인증키는 RISS가 <strong>나에게</strong> 내준 열쇠입니다. 키가 새어 나가 다른 사람이 쓰면 그 기록은 내 키로 남고, 그 사람이 대량으로 받아 가면 내 키의 이용이 제한될 수 있습니다. 남에게 넘길 수 없다는 조건도 있으니, 처음부터 새어 나갈 길을 막아 둡니다.</p>
+  <h3>하지 말 것</h3>
+  <ol class="nums">
+    <li><strong>채팅창에 키를 붙여 넣지 않습니다.</strong> 클로드 웹, 챗GPT, 클로드 코드의 대화창 모두 마찬가지입니다. 붙여 넣은 글은 대화 기록에 남습니다.</li>
+    <li><strong>작업 폴더에 키를 적은 파일을 두지 않습니다.</strong> 폴더를 압축해 보내거나 깃허브에 올리면 키가 같이 갑니다. 클로드 코드도 폴더 안 파일은 읽을 수 있습니다.</li>
+    <li><strong>메일 전달, 단체 대화방, 공유 문서에 적지 않습니다.</strong></li>
+    <li><strong>키가 보이는 화면을 캡처하거나 화면 공유하지 않습니다.</strong> 브라우저 주소창에 키를 넣어 시험하면 방문 기록에도 남으니 하지 않습니다.</li>
+  </ol>
+  <h3>대신 이렇게: 환경 변수</h3>
+  <p><strong>환경 변수</strong>는 내 Windows 계정에 이름을 붙여 저장해 두는 값입니다. 키를 <code>RISS_API_KEY</code>라는 이름으로 넣어 두면, 클로드 코드가 만든 프로그램은 값을 몰라도 이 이름으로 꺼내 씁니다. 작업 폴더 밖에 있으니 폴더를 보내도 따라가지 않고, 클로드 코드에게도 값 대신 이름만 알려 주면 됩니다.</p>
+  <p class="muted">환경 변수도 내 PC 안에 그대로 저장된다는 점은 같습니다. PC 계정을 남과 같이 쓰지 않고, 키가 새어 나간 것 같으면 RISS 고객센터(1599-3122)에 알립니다.</p>
 </section>
 
 <section class="step" id="s5">
-  <h2><span class="n">5</span>도구 폴더 준비</h2>
-  <p>RISS와 클로드 코드 사이를 이어 주는 작은 프로그램(MCP 서버)을 이 자료와 함께 만들어 두었습니다. 키와 함께 <code>실습\도구\riss\</code> 폴더에 둡니다.</p>
+  <h2><span class="n">5</span>키를 환경 변수로 등록</h2>
+  <p>받은 키를 복사해 둡니다. 키를 다른 기기에서 받았다면 메모장에 잠깐 붙여 저장해 옮겨도 됩니다. 이 메모 파일은 등록이 끝나면 지웁니다.</p>
   <ol class="nums">
-    <li><code>실습\도구\riss\</code> 폴더를 만듭니다.</li>
-    <li><a href="riss_mcp.py" download><strong>riss_mcp.py 내려받기</strong></a> → 이 폴더에 저장합니다.</li>
-    <li>같은 폴더에 텍스트 문서를 만들어 이름을 <code>riss_key.txt</code>로 바꾸고, 메모장으로 열어 <strong>키 한 줄만</strong> 붙여 넣고 저장합니다.</li>
+    <li>시작 버튼을 누르고 <code>환경 변수</code>를 입력한 뒤, <strong>계정의 환경 변수 편집</strong>을 클릭합니다.</li>
+    <li>위쪽 '사용자 변수' 칸 아래의 <strong>새로 만들기</strong>를 누릅니다.</li>
+    <li><strong>변수 이름</strong>에 <code>RISS_API_KEY</code>를 입력합니다(대문자, 밑줄 그대로).</li>
+    <li><strong>변수 값</strong>에 키를 붙여 넣습니다. 앞뒤에 빈칸이 들어가지 않게 합니다.</li>
+    <li><strong>확인</strong>을 누르고, 처음 창도 <strong>확인</strong>을 눌러 닫습니다.</li>
   </ol>
-<pre class="tree">실습\도구\riss\
-├─ riss_mcp.py  <i>← RISS 연결 프로그램</i>
-└─ riss_key.txt  <i>← 내 키 한 줄 (남에게 보내지 않음)</i></pre>
-  <p class="muted">riss_mcp.py가 하는 일: 검색어·자료 종류·연도·건수·정렬을 받아 RISS에 묻고, 결과를 제목·저자·학술지·등재·링크 같은 이름표를 붙여 돌려줍니다. 키는 riss_key.txt에서 읽습니다. 파일을 메모장으로 열어 보면 내용을 확인할 수 있습니다.</p>
+  <div class="box"><span class="lab">변수 이름 (복사해서 쓰기)</span><pre>RISS_API_KEY</pre></div>
+  <div class="note"><b class="t">창을 새로 열어야 보입니다</b><p>등록 전에 열어 둔 명령 프롬프트와 클로드 코드는 새 환경 변수를 모릅니다. 모두 닫고 새로 엽니다.</p></div>
+  <div class="note warn"><b class="t">클로드 코드에게 등록을 부탁하지 않는 이유</b><p>부탁하려면 키를 대화창에 붙여 넣어야 합니다. 4단계의 '하지 말 것' 1번에 걸리니, 이 단계만은 직접 합니다.</p></div>
 </section>
 
 <section class="step" id="s6">
-  <h2><span class="n">6</span>키가 되는지 확인</h2>
-  <p><code>도구\riss</code> 폴더에서 명령 프롬프트를 열고(<a href="../#prep-c">준비 C</a>) 아래를 입력합니다. 클로드 코드를 켜지 않고 프로그램만 시험하는 단계입니다.</p>
-  <div class="box"><span class="lab">명령 프롬프트에 입력</span><pre>uv run --script riss_mcp.py --test 교육청 장학사</pre></div>
-  <figure><img src="../asset/t_riss_test.webp" alt="명령 프롬프트 화면. 키 확인 성공: '교육청 장학사' 국내학술논문 92건 중 최신 3건이 출력되었다." loading="lazy" width="1200" height="228">
-    <figcaption><b>키 확인 성공</b>과 최신 논문 3편이 나오면 됩니다. 처음 실행할 때는 필요한 부품을 받느라 'Installed 29 packages' 같은 줄이 먼저 나옵니다.</figcaption></figure>
+  <h2><span class="n">6</span>문헌조사 폴더와 CLAUDE.md</h2>
+  <p><code>실습\문헌조사\</code> 폴더와 그 안에 <code>결과\</code> 폴더를 만들고, <code>CLAUDE.md</code>를 둡니다. 만드는 방법은 <a href="../persona/#s4">따라 하기 ①의 4단계</a>와 같습니다. 아래 내용을 그대로 붙여 넣으면 됩니다. 키 값은 어디에도 적지 않습니다.</p>
+  <div class="box file"><span class="lab">문헌조사\CLAUDE.md</span><pre># 문헌 조사
+
+## RISS 검색 API
+- 키는 환경 변수 `RISS_API_KEY`에 있다. 키 값을 화면에 출력하거나, 파일·코드·로그에 쓰지 않는다(코드에서는 환경 변수로만 읽는다).
+- 요청 주소: `https://www.riss.kr/openApi?key=&lt;키&gt;&amp;version=1.0&amp;type=&lt;자료 종류&gt;&amp;keyword=&lt;검색어&gt;&amp;rowcount=&lt;건수&gt;`
+  - 자료 종류(type): A 국내학술논문, T 학위논문, O 해외학술논문, U 단행본, F 연구보고서, S 학술지
+  - keyword 대신 title(제목), author(저자), subject(주제어)로 좁혀 찾을 수 있다. 검색어는 UTF-8로 인코딩한다.
+  - rowcount는 최대 100, rsnum은 시작 번호(1부터). 정렬은 sort=Y&amp;asc=D(최신순).
+  - 연도로 거를 때는 spubdate와 epubdate를 둘 다 준다(하나만 주면 0건).
+  - 응답은 XML: head의 totalcount(전체 건수), Error(0이면 정상, 004는 인증 오류), metadata마다 riss.title, riss.author, riss.publisher, riss.pubdate, riss.stitle(학술지), riss.reg(등재), riss.mtype(학위 구분), url(상세 링크).
+- 자세한 설명: https://www.riss.kr/apicenter/apiSearchDissKor.do
+
+## 작업 규칙
+- 결과 목록은 `결과\`에 CSV(`utf-8-sig`)로 저장하고, 각 줄에 RISS 링크를 남긴다.
+- 한꺼번에 많이 받지 않는다(한 번에 100건 이하, RISS 대량 자동 수집 금지).
+- 한 일은 `Working_history.md`에 날짜와 함께 한 줄로 기록한다.</pre></div>
+  <ul class="dots">
+    <li><strong>키 규칙:</strong> 클로드 코드는 키 이름만 알고, 값은 화면이나 파일에 남기지 않게 합니다.</li>
+    <li><strong>API 요약:</strong> RISS 안내 페이지의 요청 방식을 줄여 적었습니다. '연도는 둘 다 준다'는 발표자가 직접 써 보다가 알게 된 점입니다. 이걸 적어 두면 클로드 코드가 처음부터 맞게 부릅니다.</li>
+    <li><strong>대량 수집 금지:</strong> RISS 이용 조건을 적어 두면 작업할 때마다 지킵니다.</li>
+  </ul>
 </section>
 
 <section class="step" id="s7">
-  <h2><span class="n">7</span>클로드 코드에 연결</h2>
-  <p>같은 창에서 아래 명령으로 클로드 코드에 RISS 도구를 등록합니다. <strong>경로는 내 PC의 riss_mcp.py 위치로 바꿉니다.</strong> 경로의 <code>\</code>는 <code>/</code>로 바꿔 씁니다.</p>
-  <div class="box"><span class="lab">명령 프롬프트에 입력 (경로를 내 것으로)</span><pre>claude mcp add riss --scope user -- uv run --script E:/AI_Work/261027_KLEI_AI_Lecture/실습/도구/riss/riss_mcp.py</pre></div>
-  <div class="box"><span class="lab">등록 확인</span><pre>claude mcp get riss</pre></div>
-  <figure><img src="../asset/t_riss_add.webp" alt="명령 프롬프트 화면. claude mcp add 실행 결과 Added stdio MCP server riss가 나오고, claude mcp get riss 결과 Scope: User config, Status: Connected가 보인다." loading="lazy" width="1200" height="426">
-    <figcaption><b>Status: √ Connected</b>가 보이면 연결된 것입니다.</figcaption></figure>
+  <h2><span class="n">7</span>키가 되는지 확인</h2>
+  <p><code>문헌조사</code> 폴더에서 터미널을 새로 열고(<a href="../#prep-c">준비 C</a>) <code>claude</code>를 실행한 뒤, 먼저 키가 잘 들어갔는지만 확인합니다.</p>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>RISS_API_KEY 환경 변수가 있는지 값은 보여 주지 말고 확인하고, RISS 검색 API로 "장학사"를 국내학술논문에서 검색하면 몇 건인지 알려 줘</pre></div>
+  <figure><img src="../asset/t_riss_check.webp" alt="클로드 코드 화면. RISS 국내학술논문에서 장학사를 검색하면 264건이고, 환경 변수 RISS_API_KEY는 32자로 들어 있으며 값은 출력하지 않았다고 설명한다." loading="lazy" width="1200" height="511">
+    <figcaption>클로드 코드가 환경 변수가 있는지(32자)만 확인하고 <b>값은 출력하지 않았습니다.</b> 코드 안에서 키를 환경 변수로 읽어 '장학사' 국내학술논문 264건을 확인했습니다.</figcaption></figure>
   <ul class="dots">
-    <li><code>--scope user</code>는 '내 모든 폴더에서 쓰겠다'는 뜻입니다. 어느 폴더에서 클로드 코드를 켜도 RISS를 쓸 수 있습니다.</li>
-    <li><code>--script</code>를 빼거나 경로에 <code>\</code>를 쓰면, 발표자 PC에서는 연결이 끊기는 경우가 있었습니다. 위 모양 그대로 쓰는 것이 안전합니다.</li>
-    <li>등록을 지우려면 <code>claude mcp remove riss -s user</code>를 입력합니다.</li>
+    <li><strong>'환경 변수가 없다'고 하면:</strong> 5단계 등록 뒤에 터미널과 클로드 코드를 새로 열었는지 봅니다.</li>
+    <li><strong>'인증 오류'(004)가 나오면:</strong> 키를 붙여 넣을 때 빈칸이나 글자가 빠졌는지, 고른 자료 종류가 내 키의 승인 범위에 들어 있는지 봅니다.</li>
   </ul>
 </section>
 
 <section class="step" id="s8">
-  <h2><span class="n">8</span>문헌조사 폴더와 CLAUDE.md</h2>
-  <p><code>실습\문헌조사\</code> 폴더와 그 안에 <code>결과\</code> 폴더를 만들고, <code>CLAUDE.md</code>를 둡니다. 만드는 방법은 <a href="../persona/#s4">따라 하기 ①의 4단계</a>와 같습니다. 키 파일 경로는 내 것으로 바꿉니다.</p>
-  <div class="box file"><span class="lab">문헌조사\CLAUDE.md</span><pre># 문헌 조사
-
-- 문헌 검색은 RISS 도구(riss_search)를 쓴다. 키는 `E:\AI_Work\261027_KLEI_AI_Lecture\실습\도구\riss\riss_key.txt`에 있으니 화면에 출력하지 않는다.
-- 결과 목록은 `결과\`에 CSV(`utf-8-sig`)로 저장하고, 각 줄에 RISS 링크를 남긴다.
-- 한꺼번에 많이 받지 않는다(한 번에 100건 이하, RISS 대량 자동 수집 금지).
-- 한 일은 `Working_history.md`에 날짜와 함께 한 줄로 기록한다.</pre></div>
-  <p>RISS의 이용 조건(키 비공개, 대량 수집 금지)을 CLAUDE.md에 적어 두면 클로드 코드가 작업할 때마다 지킵니다.</p>
-</section>
-
-<section class="step" id="s9">
-  <h2><span class="n">9</span>검색해서 목록 CSV 만들기</h2>
-  <p><code>문헌조사</code> 폴더에서 터미널을 열고 <code>claude</code>를 실행한 뒤 이렇게 부탁합니다.</p>
+  <h2><span class="n">8</span>검색해서 목록 CSV 만들기</h2>
+  <p>같은 창에서 이어서 부탁합니다.</p>
   <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>RISS에서 "교육청"과 "장학사"를 다룬 국내학술논문과 학위논문을 찾아 최신순 목록을 표로 보여 주고, 결과\교육청_장학사_문헌목록.csv로 저장해 줘</pre></div>
-  <figure><img src="../asset/t_riss_calling.webp" alt="클로드 코드 화면. 입력한 부탁 아래에 Called riss 2 times, 이어서 Calling riss 4 times와 검색어 '교육청 장학사'가 보인다." loading="lazy" width="1200" height="511">
-    <figcaption>클로드 코드가 RISS 도구를 여러 번 부르며(<b>Called riss</b>) 검색합니다. 'Advising using...' 줄은 발표자 PC 설정이라 여러분 화면에는 나오지 않습니다.</figcaption></figure>
-  <figure><img src="../asset/t_riss_result.webp" alt="클로드 코드 화면. 검색 범위를 좁힌 이유, 최근 연구에서 '교육전문직'이라는 말을 쓴다는 점, RISS 서지 오류 한 건을 설명하고 Working_history.md에 기록했다고 알린다." loading="lazy" width="1200" height="511">
-    <figcaption>약 4분 뒤 목록을 저장하고, 검색하면서 내린 판단을 설명했습니다.</figcaption></figure>
-  <p>클로드 코드가 설명한 판단은 이랬습니다. 문헌 조사에서 사람이 하던 판단과 같습니다.</p>
-  <ul class="dots">
-    <li><strong>범위를 좁힌 이유:</strong> 전체 필드로 찾으니 학술논문 92건, 학위논문 183건이 나왔지만, 대부분은 초록에서 장학사를 한 번 언급한 정도였습니다. 그래서 두 말을 제목이나 주제어에 함께 다룬 논문만 남겼습니다.</li>
-    <li><strong>최근 논문이 적은 이유:</strong> 17건 중 2020년대 논문은 2건뿐인데, 최근 연구는 '장학사' 대신 '교육전문직(원)'이라는 말을 주로 쓰기 때문으로 보인다고 했습니다.</li>
-    <li><strong>RISS 서지 오류:</strong> 12번 논문은 RISS에 영문 제목이 엉뚱하게 등록되어 있다고 짚었습니다(CSV가 아니라 RISS 원래 기록의 문제).</li>
-  </ul>
-  <p>저장된 <code>결과\교육청_장학사_문헌목록.csv</code>는 17줄입니다. 엑셀로 열면 번호, 유형, 발행연도, 제목, 저자, 발행처, 학술지, 권, 호, 등재, 학위구분, 원문있음, 원문요금, 검색일치, 링크 열이 보입니다. 주요 열만 옮기면 아래와 같습니다.</p>
+  <figure><img src="../asset/t_riss_code.webp" alt="클로드 코드 화면. 한글이 깨져 응답 인코딩을 확인하겠다는 말 아래, 키를 os.environ RISS_API_KEY로 읽는 파이썬 코드가 보인다." loading="lazy" width="1200" height="511">
+    <figcaption>클로드 코드가 RISS를 부르는 코드를 직접 짜서 실행합니다. 키는 <b>os.environ["RISS_API_KEY"]</b>처럼 이름으로만 읽습니다. 윈도우에서 한글이 깨지는 문제도 스스로 찾아 고쳤습니다. 'Advising using...' 줄은 발표자 PC 설정이라 여러분 화면에는 나오지 않습니다.</figcaption></figure>
+  <figure><img src="../asset/t_riss_result.webp" alt="클로드 코드 화면. 275건을 저장했고, 나머지 258건은 두 낱말이 초록 같은 다른 곳에만 나와 관련 없는 논문도 섞여 있어 검색일치 열에 표시했으며, 요청은 7번, 한 번에 100건 이하였다고 설명한다." loading="lazy" width="1200" height="511">
+    <figcaption>약 5분 뒤 국내학술논문 92건과 학위논문 183건, 모두 275건을 CSV로 저장했습니다. 두 낱말이 초록에만 나오는 논문이 많아, 제목이나 주제어에 함께 나오는 17편을 <b>'검색일치' 열</b>로 구분해 두었다고 알려 줍니다. 요청은 7번, 한 번에 100건 이하로 CLAUDE.md의 규칙을 지켰습니다. (화면의 '이전 목록'은 발표자가 앞서 같은 검색을 해 둔 파일입니다.)</figcaption></figure>
+  <p>275건은 너무 많으니 결과를 보고 범위를 좁혀 달라고 합니다.</p>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>제목이나 주제어에 두 낱말이 함께 나오는 17편만 남겨서 결과\교육청_장학사_문헌목록.csv를 다시 저장해 줘</pre></div>
+  <figure><img src="../asset/t_riss_refine.webp" alt="클로드 코드 화면. 제목이나 주제어에 두 낱말이 함께 들어간 17편(국내학술논문 6편, 학위논문 11편)만 남겨 다시 저장했다고 알린다." loading="lazy" width="1200" height="511">
+    <figcaption>17편(국내학술논문 6편, 학위논문 11편)만 남겨 다시 저장했습니다. 작업 이력도 한 줄 남겼습니다.</figcaption></figure>
+  <p>저장된 <code>결과\교육청_장학사_문헌목록.csv</code>를 엑셀로 열면 번호, 유형, 발행연도, 제목, 저자, 발행처, 학술지, 권, 호, 등재, 학위구분, 원문있음, 원문요금, 검색일치, 링크 열이 보입니다. 주요 열만 옮기면 아래와 같습니다.</p>
   <div class="tbl wide"><table>
     <tr><th class="c">번호</th><th>유형</th><th class="c">연도</th><th>제목 (앞부분)</th><th>저자</th><th>학술지·수여기관</th><th>등재·학위</th></tr>
     <tr><td class="c">1</td><td class="nw">국내학술논문</td><td class="c">2025</td><td>과학영재 특례자 제도 실행의 장애 요인과 정책 개선 방향: 시도교육청 장학사 관점을 중심으로</td><td class="nw">유민희; 류춘열</td><td>영재와 영재교육</td><td class="nw">KCI등재</td></tr>
@@ -188,37 +190,29 @@
     <tr><td class="c">3</td><td class="nw">국내학술논문</td><td class="c">2011</td><td>지역교육청 유아 담당 장학사의 문화에 대한 질적 연구</td><td class="nw">서현; 이승은</td><td>한국유아교육학회 학술대회자료집</td><td class="nw"></td></tr>
     <tr><td class="c">4</td><td class="nw">국내학술논문</td><td class="c">2010</td><td>초임 체육장학사 문화에 대한 사례연구</td><td class="nw">최흥섭; 박순이</td><td>학습자중심교과교육연구</td><td class="nw">KCI등재</td></tr>
     <tr><td class="c">5</td><td class="nw">국내학술논문</td><td class="c">2009</td><td>유아 담당 장학사의 어려움과 보람, 그리고 희망</td><td class="nw">이대균 외 2명</td><td>유아교육학논집</td><td class="nw">KCI등재</td></tr>
-    <tr><td class="c">6</td><td class="nw">학위논문</td><td class="c">2009</td><td>장학사의 직무 인식과 역할 재정립: 강원도교육청 소속 장학사를 중심으로</td><td class="nw">김영자</td><td>한국교원대학교 정책대학원</td><td class="nw">국내석사</td></tr>
-    <tr><td class="c">7</td><td class="nw">학위논문</td><td class="c">2009</td><td>교원 및 장학사의 인식으로 본 장학의 개념 연구: 충청북도교육청 장학을 중심으로</td><td class="nw">백우정</td><td>한국교원대학교 정책대학원</td><td class="nw">국내석사</td></tr>
-    <tr><td class="c">8</td><td class="nw">학위논문</td><td class="c">2009</td><td>울산광역시 교육청 장학사의 업무부담에 관한 문화기술적 사례연구</td><td class="nw">김상호</td><td>울산대학교</td><td class="nw">국내석사</td></tr>
+    <tr><td class="c">6</td><td class="nw">학위논문</td><td class="c">2009</td><td>교원 및 장학사의 인식으로 본 장학의 개념 연구: 충청북도교육청 장학을 중심으로</td><td class="nw">백우정</td><td>한국교원대학교 정책대학원</td><td class="nw">국내석사</td></tr>
+    <tr><td class="c">7</td><td class="nw">학위논문</td><td class="c">2009</td><td>울산광역시 교육청 장학사의 업무부담에 관한 문화기술적 사례연구</td><td class="nw">김상호</td><td>울산대학교</td><td class="nw">국내석사</td></tr>
+    <tr><td class="c">8</td><td class="nw">학위논문</td><td class="c">2009</td><td>장학사의 직무 인식과 역할 재정립: 강원도교육청 소속 장학사를 중심으로</td><td class="nw">김영자</td><td>한국교원대학교 정책대학원</td><td class="nw">국내석사</td></tr>
     <tr><td class="c">9</td><td class="nw">국내학술논문</td><td class="c">2008</td><td>지역교육청의 장학사 문화에 관한 질적 사례 연구</td><td class="nw">장원규</td><td>교육학연구</td><td class="nw">KCI등재</td></tr>
-    <tr><td class="c">10</td><td class="nw">학위논문</td><td class="c">2003</td><td>지역교육청 중등장학사의 직무수행에 관한 질적 연구</td><td class="nw">표관식</td><td>고려대학교 행정대학원</td><td class="nw">국내석사</td></tr>
-    <tr><td class="c">...</td><td colspan="6" class="muted">11~17번은 2003~1973년 학위논문 7편(한자 제목 포함)</td></tr>
+    <tr><td class="c">10</td><td class="nw">학위논문</td><td class="c">2003</td><td>지역교육청 장학사의 직무분석</td><td class="nw">구교열</td><td>서울교육대학교 교육대학원</td><td class="nw">국내석사</td></tr>
+    <tr><td class="c">11</td><td class="nw">학위논문</td><td class="c">2003</td><td>지역교육청 중등장학사의 직무수행에 관한 질적 연구</td><td class="nw">표관식</td><td>고려대학교 행정대학원</td><td class="nw">국내석사</td></tr>
+    <tr><td class="c">...</td><td colspan="6" class="muted">12~17번은 2001~1973년 학위논문 6편(한자 제목 포함)</td></tr>
   </table></div>
   <h3>이어서 해 볼 만한 부탁</h3>
+  <p>최근 연구는 '장학사' 대신 '교육전문직(원)'이라는 말을 쓰기도 합니다. 275건 목록에도 '교육전문직원의 의사결정 역량 발현 과정에 관한 근거이론적 연구'(2026) 같은 논문이 있었습니다.</p>
   <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>'교육청 교육전문직'으로도 검색해서 목록에 추가해 줘</pre></div>
   <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>목록을 연대별로 나눠서 연구 주제가 어떻게 바뀌었는지 정리해 줘</pre></div>
   <p class="muted">초록 본문은 API로 오지 않으므로, 요약을 부탁하면 클로드 코드는 제목과 서지 정보만 보고 정리합니다. 깊이 읽을 논문은 링크로 원문을 확인합니다.</p>
 </section>
 
-<section class="step" id="s10">
-  <h2><span class="n">10</span>코덱스와 웹에서는</h2>
+<section class="step" id="s9">
+  <h2><span class="n">9</span>코덱스와 웹에서는</h2>
   <h3>코덱스(ChatGPT)</h3>
-  <p>같은 riss_mcp.py를 그대로 씁니다. 등록 명령만 다릅니다.</p>
-  <div class="box"><span class="lab">명령 프롬프트에 입력 (경로를 내 것으로)</span><pre>codex mcp add riss -- uv run --script E:/AI_Work/261027_KLEI_AI_Lecture/실습/도구/riss/riss_mcp.py</pre></div>
-  <p>이 명령은 코덱스 설정 파일(<code>config.toml</code>)에 아래 내용을 넣습니다. 파일을 직접 고쳐도 됩니다. <code>codex mcp list</code>로 등록됐는지 봅니다.</p>
-  <div class="box file"><span class="lab">config.toml에 들어가는 내용</span><pre>[mcp_servers.riss]
-command = "uv"
-args = ["run", "--script", "E:/AI_Work/261027_KLEI_AI_Lecture/실습/도구/riss/riss_mcp.py"]</pre></div>
-  <p>그다음 8단계의 CLAUDE.md를 <code>AGENTS.md</code>로 복사해 두고, <code>문헌조사</code> 폴더에서 <code>codex</code>를 실행해 9단계와 같은 부탁을 합니다. (발표자 PC에서는 등록과 설정 파일까지 확인했고, 코덱스 실행 화면은 싣지 않았습니다.)</p>
+  <p>방식은 같습니다. 5단계의 환경 변수는 그대로 쓰고, 6단계의 CLAUDE.md를 복사해 이름을 <code>AGENTS.md</code>로 바꿔 둡니다. 그다음 <code>문헌조사</code> 폴더에서 <code>codex</code>를 실행해 7·8단계와 같은 부탁을 합니다. 코덱스는 인터넷에 접속하는 명령을 실행하기 전에 허락을 물을 수 있으니, 무엇을 하려는지 읽어 보고 허락합니다. (발표자 PC에서는 코덱스 실행 화면을 찍지 못했습니다.)</p>
   <h3>클로드 웹, 챗GPT 웹</h3>
-  <p>브라우저에서 쓰는 클로드(claude.ai)와 챗GPT는 <strong>인터넷에 공개된 서버</strong>만 연결할 수 있습니다. 이 자료의 RISS 도구는 내 PC에서 돌고, 키는 남과 나눌 수 없으니 공개 서버로 올리는 것도 맞지 않습니다. 그래서 웹에서는 이렇게 씁니다.</p>
-  <ul class="dots">
-    <li><strong>검색은 내 PC에서, 분석은 웹에서:</strong> 9단계처럼 클로드 코드로 목록 CSV를 만든 뒤, 그 파일을 웹 채팅에 올려 분류·정리를 부탁합니다.</li>
-    <li><strong>데스크톱 앱:</strong> 내 PC에 설치하는 클로드 데스크톱 앱은 내 PC의 MCP 서버를 연결할 수 있습니다. 설정 방법은 앱의 안내를 따릅니다.</li>
-  </ul>
+  <p>브라우저에서 쓰는 클로드(claude.ai)와 챗GPT는 내 PC의 환경 변수를 볼 수 없습니다. 키를 대화창에 붙여 넣는 방법은 4단계에서 말한 대로 하지 않습니다. 대신 <strong>검색은 내 PC의 클로드 코드로 하고</strong>, 8단계에서 만든 CSV 파일을 웹 채팅에 올려 분류하거나 정리해 달라고 부탁합니다. CSV에는 키가 들어 있지 않습니다.</p>
   <div class="note"><b class="t">지킬 것 세 가지</b>
-    <p>① 키는 나만 씁니다(양도·공유 금지). ② 한 번에 100건 이하로, 필요한 만큼만 받습니다(대량 자동 수집 금지). ③ RISS 검색 결과는 BY-NC-ND 조건이라, 출처(RISS, KERIS)를 밝히고 영리 목적이나 2차 저작물로 쓰지 않습니다.</p></div>
+    <p>① 키는 나만 쓰고, 환경 변수에만 둡니다. ② 한 번에 100건 이하로, 필요한 만큼만 받습니다(대량 자동 수집 금지). ③ RISS 검색 결과는 BY-NC-ND 조건이라, 출처(RISS, KERIS)를 밝히고 영리 목적이나 2차 저작물로 쓰지 않습니다.</p></div>
 </section>
 
 <div class="next"><a href="../persona/">← 따라 하기 ① 페르소나 가상 설문</a><a href="../">후속자료 처음으로</a></div>
@@ -226,7 +220,7 @@ args = ["run", "--script", "E:/AI_Work/261027_KLEI_AI_Lecture/실습/도구/riss
 
 <footer><div class="wrap">
   <p>화면은 2026년 10월 27일 Windows 11, Claude Code 2.1.311(Opus 5.5)에서 실제로 실행하며 찍었습니다. RISS 화면은 발표자 계정으로 로그인해 찍었고 개인 연락처는 가렸습니다.</p>
-  <p>자료: RISS 학술연구정보서비스(KERIS) 검색 API · <a href="riss_mcp.py" download>riss_mcp.py</a>는 이 자료를 위해 만든 예제입니다.</p>
+  <p>자료: RISS 학술연구정보서비스(KERIS) 검색 API</p>
 </div></footer>
 <script src="../asset/guide.js"></script>
 </body>

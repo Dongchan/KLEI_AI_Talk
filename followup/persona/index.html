@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
+<link rel="icon" href="data:,">
+<title>페르소나 가상 설문</title>
+<meta name="description" content="NVIDIA Nemotron-Personas-Korea를 내려받아 별도 폴더에 두고, 클로드 코드로 표본을 뽑아 가상 설문을 해 보는 9단계 안내.">
+<link rel="stylesheet" href="../asset/guide.css">
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <span class="crumb"><a href="../">후속자료</a> · <b>따라 하기 ①</b></span>
+  <a href="../riss/">RISS 연결 →</a>
+</div></div>
+
+<main class="wrap">
+<header class="hero">
+  <p class="kicker">따라 하기 ①</p>
+  <h1>한국인 페르소나로<br>가상 설문 해 보기</h1>
+  <p class="lead">NVIDIA가 공개한 한국인 가상 인물 100만 명 자료를 내려받아 별도 폴더에 두고, 클로드 코드가 그 폴더를 참조해 표본을 뽑고 설문에 답하게 합니다.</p>
+  <p class="meta">준비: <a href="../#prep-a">클로드 코드와 uv 설치, 폴더에서 터미널 여는 법</a> · 걸리는 시간: 30분 안팎</p>
+</header>
+
+<nav class="toc" aria-label="단계">
+  <h2>9단계</h2>
+  <ol>
+    <li><a href="#s1">어떤 자료인가</a></li>
+    <li><a href="#s2">웹에서 먼저 둘러보기</a></li>
+    <li><a href="#s3">폴더 만들기</a></li>
+    <li><a href="#s4">CLAUDE.md 쓰기</a></li>
+    <li><a href="#s5">자료 내려받기</a></li>
+    <li><a href="#s6">자료 살펴보기</a></li>
+    <li><a href="#s7">조건에 맞는 표본 뽑기</a></li>
+    <li><a href="#s8">가상 설문 돌리기</a></li>
+    <li><a href="#s9">결과를 읽을 때 주의할 점</a></li>
+  </ol>
+</nav>
+
+<section class="step" id="s1">
+  <h2><span class="n">1</span>어떤 자료인가</h2>
+  <p><strong>Nemotron-Personas-Korea</strong>는 NVIDIA가 2026년 4월 허깅페이스에 공개한 한국인 페르소나 데이터 셋입니다. 실제 사람이 아니라, 국가통계포털(KOSIS)·대법원·국민건강보험공단·농촌경제연구원·NAVER Cloud 통계의 분포에 맞춰 만든 <strong>가상 인물</strong>입니다.</p>
+  <div class="tbl"><table>
+    <tr><th>규모</th><td>100만 명, 항목(열) 26개</td></tr>
+    <tr><th>파일</th><td>파케이(.parquet) 파일 9개, 합계 약 2GB (파일 하나에 약 11만 명)</td></tr>
+    <tr><th>이용 조건</th><td>CC BY 4.0: 출처를 밝히면 자유롭게 쓸 수 있습니다</td></tr>
+    <tr><th>주소</th><td><a href="https://huggingface.co/datasets/nvidia/Nemotron-Personas-Korea">huggingface.co/datasets/nvidia/Nemotron-Personas-Korea</a></td></tr>
+  </table></div>
+  <p>항목은 크게 인구통계, 지역, 페르소나 서술로 나뉩니다. 아래 값과 비율은 6단계에서 클로드 코드가 100만 명 전체를 세어 정리한 것입니다.</p>
+  <div class="tbl wide"><table>
+    <tr><th>열 이름</th><th>뜻</th><th>값이나 분포</th></tr>
+    <tr><td class="nw"><code>sex</code>, <code>age</code></td><td>성별, 나이</td><td>여자 50.4%·남자 49.6%, 19~99세(평균 50.7세)</td></tr>
+    <tr><td class="nw"><code>marital_status</code></td><td>혼인 상태</td><td>배우자있음 59.3%, 미혼 25.7%, 사별 8.8%, 이혼 6.3%</td></tr>
+    <tr><td class="nw"><code>education_level</code></td><td>최종 학력</td><td>고등학교 33.1%, 4년제 대학교 27.1%, 2~3년제 전문대학 15.0% 등 7가지</td></tr>
+    <tr><td class="nw"><code>bachelors_field</code></td><td>전공 계열</td><td>4년제 대학교·대학원 졸업자만 값이 있고, 나머지는 '해당없음'</td></tr>
+    <tr><td class="nw"><code>occupation</code></td><td>직업</td><td>2,120가지. 무직 36.7%, 건물 청소원 1.8%, 건물 경비원 1.7%, 경리 사무원 1.6% 등</td></tr>
+    <tr><td class="nw"><code>family_type</code>, <code>housing_type</code></td><td>가족 형태, 주거 형태</td><td>배우자·자녀와 거주 27.0% 등 39가지 / 아파트 62.1% 등 6가지</td></tr>
+    <tr><td class="nw"><code>province</code>, <code>district</code></td><td>시도, 시군구</td><td>17개 시도(경기 26.2%, 서울 18.5% 등), 252개 시군구</td></tr>
+    <tr><td class="nw"><code>persona</code></td><td>한 문장 요약</td><td>"OOO 씨는 광주 서구에서 평생 하역 일을 하며 살아온 70대 가장으로..." 같은 서술</td></tr>
+    <tr><td class="nw"><code>*_persona</code> 6개</td><td>분야별 서술</td><td>직업·스포츠·예술·여행·음식·가족 장면을 따로 쓴 서술</td></tr>
+    <tr><td class="nw"><code>skills_*</code>, <code>hobbies_*</code> 등</td><td>속성 서술</td><td>문화적 배경, 기술·전문성, 취미·관심사, 경력 목표</td></tr>
+  </table></div>
+</section>
+
+<section class="step" id="s2">
+  <h2><span class="n">2</span>웹에서 먼저 둘러보기</h2>
+  <p>위 주소를 열면 데이터 셋 소개 화면이 나옵니다. 로그인하지 않아도 보고 내려받을 수 있습니다.</p>
+  <figure class="web"><img src="../asset/hf_dataset_card.webp" alt="허깅페이스 Nemotron-Personas-Korea 소개 화면. Dataset Viewer에 첫 줄들이 보이고 오른쪽에 Number of rows 1,000,000, Total file size 1.98 GB가 적혀 있다." loading="lazy" width="1200" height="806">
+    <figcaption><b>Dataset card 탭.</b> 가운데 Dataset Viewer에서 첫 줄들을 바로 볼 수 있고, 오른쪽에 행 수(1,000,000)와 전체 크기(1.98 GB)가 있습니다.</figcaption></figure>
+  <figure class="web"><img src="../asset/hf_data_studio.webp" alt="Data Studio 탭. 왼쪽에 표, 오른쪽에 SQL 콘솔이 있다." loading="lazy" width="1200" height="806">
+    <figcaption><b>Data Studio 탭.</b> 오른쪽 SQL 콘솔에서 조건을 걸어 볼 수도 있습니다. 다만 이 자료에서는 SQL 대신 클로드 코드에게 말로 부탁합니다.</figcaption></figure>
+</section>
+
+<section class="step" id="s3">
+  <h2><span class="n">3</span>폴더 만들기</h2>
+  <p>파일 탐색기에서 <strong>새 폴더</strong>로 아래 네 폴더를 만듭니다. 원본 자료와 실험 폴더를 나누는 이유는 <a href="../#prep-e">시작 전 준비 E</a>에 적어 두었습니다.</p>
+<pre class="tree">실습\
+├─ 자료\
+│   └─ nemotron-personas-korea\  <i>← 원본을 받을 곳 (실험이 여러 개여도 여기 하나만)</i>
+└─ 가상응답자_실험\
+    └─ 결과\  <i>← 클로드 코드가 만든 파일이 쌓일 곳</i></pre>
+</section>
+
+<section class="step" id="s4">
+  <h2><span class="n">4</span>CLAUDE.md 쓰기: 자료 위치를 알려 두기</h2>
+  <p><code>가상응답자_실험</code> 폴더에 <code>CLAUDE.md</code> 파일을 만듭니다. 클로드 코드는 이 폴더에서 시작할 때마다 이 파일을 먼저 읽기 때문에, 원본 위치와 규칙을 매번 말하지 않아도 됩니다.</p>
+  <ol class="nums">
+    <li>탐색기 위쪽 <strong>보기 → 표시 → 파일 확장명</strong>을 켭니다. 이걸 켜지 않으면 파일 이름이 <code>CLAUDE.md.txt</code>가 되어도 알아채기 어렵습니다.</li>
+    <li>폴더 빈 곳에서 오른쪽 클릭 → <strong>새로 만들기 → 텍스트 문서</strong>를 고르고, 이름을 <code>CLAUDE.md</code>로 바꿉니다('확장명을 바꾸겠느냐'고 물으면 예).</li>
+    <li>메모장으로 열어 아래 내용을 붙여 넣고 저장합니다. <strong>첫 번째 경로는 내 PC의 경로로 바꿉니다.</strong> <code>자료\nemotron-personas-korea</code> 폴더를 탐색기로 열고 주소창을 클릭하면 나오는 경로를 복사해 넣으면 됩니다.</li>
+  </ol>
+  <div class="box file"><span class="lab">가상응답자_실험\CLAUDE.md</span><pre># 가상 응답자 실험
+
+## 자료 위치
+- 페르소나 원본: `E:\AI_Work\261027_KLEI_AI_Lecture\실습\자료\nemotron-personas-korea\`
+  (NVIDIA Nemotron-Personas-Korea, 파케이 파일 9개, 100만 명)
+- 이 폴더는 읽기만 한다. 복사하거나 고치거나 지우지 않는다.
+- 파일이 커서(합계 약 2GB) 필요한 열만 골라 읽는다.
+
+## 작업 규칙
+- 결과물은 이 폴더의 `결과\`에 저장한다. CSV는 엑셀에서 한글이 깨지지 않게 `utf-8-sig`로 저장한다.
+- 무작위로 뽑을 때는 난수 시드 2026을 쓴다.
+- 한 일은 `Working_history.md`에 날짜와 함께 한 줄로 기록한다.</pre></div>
+  <ul class="dots">
+    <li><strong>읽기만 한다:</strong> 원본이 실수로 바뀌거나 지워지지 않게 막습니다.</li>
+    <li><strong>필요한 열만:</strong> 서술 열까지 통째로 읽으면 메모리를 몇 GB씩 씁니다.</li>
+    <li><strong>utf-8-sig:</strong> 이렇게 저장해야 엑셀로 열었을 때 한글이 깨지지 않습니다.</li>
+    <li><strong>시드 2026:</strong> 같은 시드로 뽑으면 다음에 다시 해도 같은 사람들이 뽑혀서 결과를 재현할 수 있습니다.</li>
+    <li><strong>Working_history.md:</strong> 무엇을 했는지 한 줄씩 남겨 두면, 나중에 다시 열었을 때 클로드 코드도 나도 이어서 할 수 있습니다.</li>
+  </ul>
+  <div class="note"><b class="t">코덱스를 쓴다면</b><p>같은 내용으로 <code>AGENTS.md</code>를 하나 더 만들어 둡니다(파일을 복사해 이름만 바꾸면 됩니다). 코덱스는 이 파일을 읽습니다.</p></div>
+</section>
+
+<section class="step" id="s5">
+  <h2><span class="n">5</span>자료 내려받기</h2>
+  <h3>방법 A. 브라우저로 받기</h3>
+  <p>데이터 셋 화면에서 <strong>Files and versions</strong> 탭 → <code>data</code> 폴더로 들어가면 파일 9개가 보입니다. 각 줄의 아래 화살표 버튼을 누르면 내려받기가 시작됩니다. 받은 파일을 <code>실습\자료\nemotron-personas-korea\</code>로 옮깁니다.</p>
+  <figure class="web"><img src="../asset/hf_files.webp" alt="Files and versions 탭의 data 폴더. train-00000-of-00009.parquet부터 train-00008-of-00009.parquet까지 9개 파일이 각각 220 MB로 나열되어 있다." loading="lazy" width="1200" height="806">
+    <figcaption>파일 9개가 각각 220 MB입니다. 연습만 하려면 첫 번째 파일 하나(약 11만 명)만 받아도 충분합니다.</figcaption></figure>
+  <h3>방법 B. 클로드 코드에게 부탁하기</h3>
+  <p><code>가상응답자_실험</code> 폴더에서 터미널을 열고(<a href="../#prep-c">준비 C</a>) <code>claude</code>를 실행한 뒤 이렇게 입력합니다. <code>..\자료</code>는 '한 단계 위 폴더의 자료 폴더'라는 뜻입니다.</p>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>허깅페이스 nvidia/Nemotron-Personas-Korea의 data 폴더에 있는 파케이 파일 9개를 ..\자료\nemotron-personas-korea 에 받아 줘</pre></div>
+  <figure><img src="../asset/t_p_download.webp" alt="클로드 코드 화면. 허깅페이스에서 파일 9개(약 1.98GB)를 확인하고, 로그인 없이 받을 수 있다며 백그라운드로 내려받기 시작했다고 알린다." loading="lazy" width="1200" height="511">
+    <figcaption>클로드 코드가 허깅페이스에서 파일 목록을 확인하고(Called Hugging Face), 로그인 없이 받을 수 있다는 것을 확인한 뒤 내려받기를 백그라운드로 돌립니다.</figcaption></figure>
+  <figure><img src="../asset/t_p_download_done.webp" alt="클로드 코드 화면. 파케이 파일 9개를 모두 받았고 크기와 SHA-256 값이 원본과 같다고 보고하며, Working_history.md에 한 줄을 기록했다." loading="lazy" width="1200" height="511">
+    <figcaption>발표자 PC에서는 약 2분 걸렸습니다. 다 받은 뒤 <b>크기와 SHA-256 값</b>(파일 지문)을 원본과 맞춰 보고, CLAUDE.md에 적은 대로 작업 이력을 남겼습니다.</figcaption></figure>
+</section>
+
+<section class="step" id="s6">
+  <h2><span class="n">6</span>자료 살펴보기</h2>
+  <p>본격적으로 쓰기 전에 무엇이 들어 있는지부터 물어봅니다. CLAUDE.md에 위치를 적어 두었으니 경로는 말하지 않아도 됩니다.</p>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>페르소나 데이터에 몇 명이 있고 어떤 항목(열)이 있는지 표로 정리해 줘</pre></div>
+  <figure><img src="../asset/t_p_explore.webp" alt="클로드 코드 화면. 26개 열을 표로 정리한 끝부분과 '가상 응답자 실험에서 미리 알아 둘 점' 목록이 보인다." loading="lazy" width="1200" height="511">
+    <figcaption>26개 열을 표로 정리하고(1단계의 표가 이 결과입니다) <b>결과\페르소나_열목록.csv</b>로 저장했습니다. 원본 폴더는 읽기만 했습니다.</figcaption></figure>
+  <p>표와 함께 미리 알아 둘 점도 짚어 주었습니다. 실험을 설계할 때 그대로 쓸 만한 내용입니다.</p>
+  <ul class="dots">
+    <li>직업이 '무직'인 사람이 36.7%입니다. 응답자를 뽑을 때 무직을 어떻게 다룰지 정해야 합니다.</li>
+    <li>전공은 4년제 대학교와 대학원 졸업자에게만 값이 있습니다.</li>
+    <li>기술·취미 목록 열은 진짜 목록이 아니라 <code>"['...', '...']"</code> 모양의 글자로 저장돼 있습니다.</li>
+    <li>시도 이름 표기가 섞여 있습니다(경상남·충청남 같은 줄인 이름과 전북·강원). KOSIS 통계와 맞춰 볼 때는 이름을 통일해야 합니다.</li>
+  </ul>
+</section>
+
+<section class="step" id="s7">
+  <h2><span class="n">7</span>조건에 맞는 표본 뽑기</h2>
+  <p>조사 대상에 맞는 사람을 골라 뽑습니다. 여기서는 수도권 25~44세 사무직 10명을 뽑았습니다.</p>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>서울·인천·경기에 사는 25~44세 가운데 직업에 "사무"가 들어간 사람 10명을 무작위로 뽑아 결과\표본_10명.csv로 저장해 줘. 나이, 성별, 시도, 학력, 직업, 페르소나 서술만 남겨 줘</pre></div>
+  <figure><img src="../asset/t_p_sample.webp" alt="클로드 코드 화면. 조건에 맞는 사람이 28,751명이고, 그중 현재 구직 중인 사람 1,188명과 사무용 기기 수리원 같은 사무 일이 아닌 직업 77명이 섞여 있다고 알린다." loading="lazy" width="1200" height="511">
+    <figcaption>조건에 맞는 사람은 28,751명이었습니다. 클로드 코드가 그 안에 <b>'현재 구직 중'인 사람(1,188명)</b>과 <b>사무 일이 아닌 직업(사무용 기기 수리원 등 77명)</b>이 섞여 있다고 먼저 알려 주었습니다. 맨 아래 입력창에 흐리게 보이는 글은 클로드 코드가 다음에 할 만한 부탁을 제안한 것으로, 아직 입력된 글이 아닙니다.</figcaption></figure>
+  <p>결과를 보고 조건을 고치는 이 대화가 이 작업의 핵심입니다. 지적받은 대로 빼고 다시 뽑습니다.</p>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>구직 중인 사람과 사무용 기기·사무용품 관련 직업은 빼고, 같은 조건으로 10명을 다시 뽑아 결과\표본_10명.csv를 바꿔 줘</pre></div>
+  <figure><img src="../asset/t_p_refine.webp" alt="클로드 코드 화면. 27,486명 중 10명을 다시 뽑은 표와 설명이 보인다." loading="lazy" width="1200" height="511">
+    <figcaption>27,486명 가운데 10명을 시드 2026으로 다시 뽑았습니다. 저장된 <b>결과\표본_10명.csv</b>는 아래와 같습니다(페르소나 서술 열은 생략).</figcaption></figure>
+  <div class="tbl"><table>
+    <tr><th class="c">나이</th><th>성별</th><th>시도</th><th>학력</th><th>직업</th></tr>
+    <tr><td class="c">33</td><td>여자</td><td>경기</td><td>4년제 대학교</td><td>공공행정 사무원</td></tr>
+    <tr><td class="c">36</td><td>남자</td><td>경기</td><td>4년제 대학교</td><td>총무 사무원</td></tr>
+    <tr><td class="c">30</td><td>여자</td><td>서울</td><td>2~3년제 전문대학</td><td>경리 사무원</td></tr>
+    <tr><td class="c">33</td><td>남자</td><td>서울</td><td>4년제 대학교</td><td>생산관리 사무원</td></tr>
+    <tr><td class="c">40</td><td>남자</td><td>서울</td><td>2~3년제 전문대학</td><td>경리 사무원</td></tr>
+    <tr><td class="c">29</td><td>여자</td><td>서울</td><td>4년제 대학교</td><td>인사 및 노무 사무원</td></tr>
+    <tr><td class="c">40</td><td>남자</td><td>경기</td><td>4년제 대학교</td><td>철도운송 사무원</td></tr>
+    <tr><td class="c">31</td><td>여자</td><td>경기</td><td>4년제 대학교</td><td>국가행정 사무원</td></tr>
+    <tr><td class="c">34</td><td>남자</td><td>서울</td><td>4년제 대학교</td><td>법무 사무원</td></tr>
+    <tr><td class="c">42</td><td>여자</td><td>서울</td><td>고등학교</td><td>사무 보조원</td></tr>
+  </table></div>
+</section>
+
+<section class="step" id="s8">
+  <h2><span class="n">8</span>가상 설문 돌리기</h2>
+  <p>먼저 <code>가상응답자_실험</code> 폴더에 설문지 파일을 만듭니다. CLAUDE.md를 만들 때처럼 텍스트 문서를 만들어 이름을 <code>설문지.md</code>로 바꾸고 아래 내용을 붙여 넣습니다.</p>
+  <div class="box file"><span class="lab">가상응답자_실험\설문지.md</span><pre># 설문지: 직장인 생성형 AI 활용 (3문항)
+
+문1. 지난 한 달 동안 업무에 생성형 AI(챗GPT, 클로드 등)를 써 본 적이 있습니까?
+  ① 있다  ② 없다
+
+문2. (문1에서 ①인 경우) 얼마나 자주 씁니까?
+  ① 거의 매일  ② 주 2~3회  ③ 주 1회  ④ 월 1~2회
+
+문3. 생성형 AI가 앞으로 5년 동안 내 일자리에 미칠 영향은 어떨 것 같습니까? 이유도 한 줄로 적어 주십시오.
+  ① 매우 긍정적  ② 다소 긍정적  ③ 별 영향 없음  ④ 다소 부정적  ⑤ 매우 부정적</pre></div>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>설문지.md의 세 문항에 표본 10명이 각자 그 사람이 되어 답하게 하고 결과\가상응답_10명.csv로 저장해 줘. 마지막에 문항별 응답 분포를 표로 보여 줘</pre></div>
+  <figure><img src="../asset/t_p_survey.webp" alt="클로드 코드 화면. 문3 응답 분포 표(별 영향 없음 3, 다소 부정적 4, 매우 부정적 0)와 '결과를 쓸 때 알아 둘 점' 목록이 보인다." loading="lazy" width="1200" height="511">
+    <figcaption>약 3분 만에 10명의 응답을 <b>결과\가상응답_10명.csv</b>로 저장하고 분포를 보여 주었습니다. 아래 '알아 둘 점'은 클로드 코드가 스스로 덧붙인 내용입니다.</figcaption></figure>
+  <div class="tbl wide"><table>
+    <tr><th class="c">번호</th><th>응답자</th><th>문1</th><th>문2</th><th>문3</th><th>문3 이유 (일부)</th></tr>
+    <tr><td class="c">1</td><td class="nw">33세 여자, 공공행정 사무원</td><td class="nw">있다</td><td class="nw">월 1~2회</td><td class="nw">별 영향 없음</td><td>기관 보안 지침 때문에 쓸 수 있는 범위가 좁고...</td></tr>
+    <tr><td class="c">2</td><td class="nw">36세 남자, 총무 사무원</td><td class="nw">있다</td><td class="nw">주 2~3회</td><td class="nw">다소 긍정적</td><td>안내문 작성이나 엑셀 정리 같은 잡무를 AI가 덜어 주니...</td></tr>
+    <tr><td class="c">3</td><td class="nw">30세 여자, 경리 사무원</td><td class="nw">있다</td><td class="nw">월 1~2회</td><td class="nw">다소 부정적</td><td>전표 입력이나 정산 같은 경리 업무는 자동화되기 쉬워서...</td></tr>
+    <tr><td class="c">4</td><td class="nw">33세 남자, 생산관리 사무원</td><td class="nw">있다</td><td class="nw">주 1회</td><td class="nw">다소 부정적</td><td>현장 조율 말고는 내가 맡을 일이 줄어들까 불안하다</td></tr>
+    <tr><td class="c">5</td><td class="nw">40세 남자, 경리 사무원</td><td class="nw">없다</td><td class="nw">해당없음</td><td class="nw">다소 부정적</td><td>40대인 내가 자리를 지킬 수 있을지 걱정이다</td></tr>
+    <tr><td class="c">6</td><td class="nw">29세 여자, 인사 및 노무 사무원</td><td class="nw">있다</td><td class="nw">거의 매일</td><td class="nw">다소 긍정적</td><td>직원 상담처럼 사람이 직접 해야 하는 일에 더 집중할 수 있을 것 같다</td></tr>
+    <tr><td class="c">7</td><td class="nw">40세 남자, 철도운송 사무원</td><td class="nw">있다</td><td class="nw">주 1회</td><td class="nw">별 영향 없음</td><td>안전 규정과 현장 확인이 핵심이라...</td></tr>
+    <tr><td class="c">8</td><td class="nw">31세 여자, 국가행정 사무원</td><td class="nw">있다</td><td class="nw">주 2~3회</td><td class="nw">다소 긍정적</td><td>반복되는 공문 작성과 자료 취합을 AI가 줄여 주면...</td></tr>
+    <tr><td class="c">9</td><td class="nw">34세 남자, 법무 사무원</td><td class="nw">있다</td><td class="nw">주 2~3회</td><td class="nw">다소 부정적</td><td>법무 실무 인력은 줄어들 수 있다</td></tr>
+    <tr><td class="c">10</td><td class="nw">42세 여자, 사무 보조원</td><td class="nw">없다</td><td class="nw">해당없음</td><td class="nw">별 영향 없음</td><td>손님 응대와 서류 챙기기가 대부분이라...</td></tr>
+  </table></div>
+  <p>정리하면 문1은 '있다' 8명·'없다' 2명, 문2(8명)는 거의 매일 1·주 2~3회 3·주 1회 2·월 1~2회 2명, 문3은 다소 긍정적 3·별 영향 없음 3·다소 부정적 4명이었습니다.</p>
+</section>
+
+<section class="step" id="s9">
+  <h2><span class="n">9</span>결과를 읽을 때 주의할 점</h2>
+  <p>클로드 코드가 결과와 함께 덧붙인 한계는 그대로 새겨 둘 만합니다.</p>
+  <ul class="dots">
+    <li><strong>한 대화에서 차례로 답했습니다.</strong> 10명이 한 대화 안에서 순서대로 답해서, 앞사람의 답이 뒷사람의 답에 영향을 줄 수 있습니다. 더 엄밀하게 하려면 응답자마다 따로 답하게 합니다. 특강 3부에서 보여 드린 가상 응답자 조사가 이 방식이었습니다(응답 에이전트가 배치마다 따로 답함).</li>
+    <li><strong>응답은 다시 하면 달라집니다.</strong> 표본은 시드로 재현되지만 응답에는 시드가 없습니다. 여러 번 돌려 답이 얼마나 흔들리는지 보는 것도 방법입니다.</li>
+    <li><strong>10명은 시연용입니다.</strong> 이 비율을 실제 직장인의 생각으로 읽으면 안 됩니다.</li>
+  </ul>
+  <div class="note"><b class="t">어디에 쓰면 좋은가</b>
+    <p>가상 응답은 실제 조사를 대신하지 않습니다. 대신 설문 문항을 미리 점검하거나(헷갈리는 문항, 빠진 보기 찾기), 응답 분포에 대한 가설을 세우거나, 실제 조사 결과와 나란히 놓고 어디서 다른지 보는 데 쓸 수 있습니다.</p></div>
+  <h3>이어서 해 볼 만한 부탁</h3>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>응답자마다 따로 답하게 하는 방식으로 다시 해 줘</pre></div>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>같은 조건에서 시도와 성별 비율을 맞춰 100명을 뽑아 줘</pre></div>
+  <div class="box prompt"><span class="lab">클로드 코드에 입력</span><pre>문3 이유를 비슷한 것끼리 묶어서 유형별로 정리해 줘</pre></div>
+  <p class="muted">자료나 결과를 발표·보고서에 쓸 때는 출처를 "NVIDIA, Nemotron-Personas-Korea (CC BY 4.0)"처럼 밝힙니다.</p>
+</section>
+
+<div class="next"><a href="../">← 후속자료 처음으로</a><a href="../riss/">따라 하기 ② RISS 연결 →</a></div>
+</main>
+
+<footer><div class="wrap">
+  <p>화면은 2026년 10월 27일 Windows 11, Claude Code 2.1.311(Opus 5.5)에서 실제로 실행하며 찍었습니다. 같은 부탁을 해도 클로드 코드의 답과 진행 순서는 조금씩 다를 수 있습니다.</p>
+  <p>자료: NVIDIA, <a href="https://huggingface.co/datasets/nvidia/Nemotron-Personas-Korea">Nemotron-Personas-Korea</a> (CC BY 4.0)</p>
+</div></footer>
+<script src="../asset/guide.js"></script>
+</body>
+</html>

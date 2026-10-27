@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
+<link rel="icon" href="data:,">
+<title>후속자료: 직접 해 보기</title>
+<meta name="description" content="AI 에이전트와 교육 연구 특강 후속자료. 한국인 페르소나로 가상 설문 해 보기, RISS 문헌 검색을 클로드 코드에 연결하기.">
+<link rel="stylesheet" href="asset/guide.css">
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <span class="crumb"><b>AI 에이전트와 교육 연구</b> · 후속자료</span>
+  <a href="../">발표자료 보기</a>
+</div></div>
+
+<main class="wrap">
+<header class="hero">
+  <p class="kicker">후속자료</p>
+  <h1>직접 해 보기:<br>가상 응답자와 RISS 문헌 검색</h1>
+  <p class="lead">특강에서 보여 드린 두 가지를 내 PC에서 처음부터 따라 할 수 있게 정리했습니다. 화면은 모두 실제로 실행하면서 찍었습니다.</p>
+  <p class="meta">2026. 10. 27. · 박동찬 · 한국직업능력연구원</p>
+</header>
+
+<div class="cards">
+  <a class="card" href="persona/">
+    <span class="tag">따라 하기 ①</span>
+    <h2>한국인 페르소나로 가상 설문 해 보기</h2>
+    <p>NVIDIA가 공개한 한국인 가상 인물 100만 명 자료를 내려받아 별도 폴더에 두고, 클로드 코드로 표본을 뽑아 설문에 답하게 합니다.</p>
+    <span class="go">9단계 보기 →</span>
+  </a>
+  <a class="card" href="riss/">
+    <span class="tag">따라 하기 ②</span>
+    <h2>RISS 문헌 검색을 클로드 코드에 연결하기</h2>
+    <p>RISS 검색 API 키를 받아 클로드 코드(또는 코덱스)에 연결하고, 주제를 검색해 문헌 목록 CSV 파일을 만듭니다.</p>
+    <span class="go">10단계 보기 →</span>
+  </a>
+</div>
+
+<p class="muted">두 자료 모두 아래 <strong>시작 전 준비</strong>를 마쳤다고 보고 설명합니다. 처음이라면 A부터 차례로 해 주세요.</p>
+
+<section class="step plain" id="prep-a">
+  <h2><span class="n">A</span>클로드 코드 설치</h2>
+  <p>클로드 코드는 유료 요금제(Pro, Max, Team, Enterprise)에서 쓸 수 있습니다. 무료 요금제에는 들어 있지 않습니다.</p>
+  <p>시작 메뉴에서 <strong>PowerShell</strong>을 열고 아래 한 줄을 붙여 넣은 뒤 <kbd>Enter</kbd>를 누릅니다. 내려받는 동안에는 아무 표시가 없으니 끝날 때까지 기다립니다.</p>
+  <div class="box"><span class="lab">PowerShell에 입력</span><pre>irm https://claude.ai/install.ps1 | iex</pre></div>
+  <p>명령 프롬프트(cmd)를 쓴다면 이 줄을 입력합니다.</p>
+  <div class="box"><span class="lab">명령 프롬프트에 입력</span><pre>curl -fsSL https://claude.ai/install.cmd -o install.cmd &amp;&amp; install.cmd &amp;&amp; del install.cmd</pre></div>
+  <p>설치가 끝나면 <strong>창을 새로 열고</strong> 아래를 입력해 버전 번호가 나오는지 봅니다. 처음 <code>claude</code>를 실행하면 브라우저가 열리고 클로드 계정으로 로그인합니다.</p>
+  <div class="box"><span class="lab">확인</span><pre>claude --version</pre></div>
+  <p class="muted">설명은 공식 안내(<a href="https://code.claude.com/docs/en/setup">code.claude.com/docs/en/setup</a>)를 따랐습니다. 'claude를 찾을 수 없다'고 나오면 창을 닫았다가 다시 열어 봅니다.</p>
+</section>
+
+<section class="step plain" id="prep-b">
+  <h2><span class="n">B</span>uv 설치</h2>
+  <p>uv는 파이썬 프로그램을 필요한 부품까지 알아서 받아 실행해 주는 도구입니다. RISS 연결 도구를 돌릴 때 필요하고, 클로드 코드가 파케이 파일을 읽을 때도 씁니다. PowerShell에 입력합니다.</p>
+  <div class="box"><span class="lab">PowerShell에 입력</span><pre>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</pre></div>
+  <p>창을 새로 열고 <code>uv --version</code>을 입력해 버전 번호가 나오면 됩니다.</p>
+</section>
+
+<section class="step plain" id="prep-c">
+  <h2><span class="n">C</span>작업 폴더에서 터미널 열기</h2>
+  <p>클로드 코드는 <strong>지금 있는 폴더</strong>를 작업 공간으로 삼습니다. 그래서 작업할 폴더에서 터미널을 여는 것이 출발점입니다.</p>
+  <ol class="nums">
+    <li>파일 탐색기에서 작업할 폴더를 엽니다.</li>
+    <li>위쪽 주소창을 한 번 클릭합니다. 이때 나오는 글자(예: <code>D:\실습\문헌조사</code>)가 그 폴더의 <strong>전체 경로</strong>입니다. 뒤에서 경로를 적을 때 여기서 복사하면 됩니다.</li>
+    <li>주소창 내용을 지우고 <code>cmd</code>를 입력한 뒤 <kbd>Enter</kbd>를 누릅니다. 그 폴더에서 명령 프롬프트가 열립니다.</li>
+    <li><code>claude</code>를 입력하고 <kbd>Enter</kbd>를 누르면 클로드 코드가 시작됩니다. 끝낼 때는 <code>/exit</code>를 입력합니다.</li>
+  </ol>
+</section>
+
+<section class="step plain" id="prep-d">
+  <h2><span class="n">D</span>처음 만나는 질문 두 가지</h2>
+  <h3>1. 이 폴더를 믿느냐는 질문</h3>
+  <p>새 폴더에서 처음 <code>claude</code>를 실행하면 아래처럼 묻습니다. 기본 선택은 <strong>No, exit</strong>입니다. 내가 만든 폴더라면 <kbd>↓</kbd>로 <strong>Yes, I trust this folder</strong>를 고르고 <kbd>Enter</kbd>를 누릅니다.</p>
+  <div class="box"><span class="lab">실제 화면의 글</span><pre>Quick safety check: Is this a project you created or one you trust?
+Claude Code'll be able to read, edit, and execute files here.
+
+&gt; No, exit
+  Yes, I trust this folder</pre></div>
+  <h3>2. 실행해도 되느냐는 질문</h3>
+  <p>클로드 코드는 명령을 실행하거나 파일을 만들기 전에 해도 되는지 묻습니다. 무엇을 하려는지 읽어 보고 괜찮으면 <strong>Yes</strong>를 고릅니다. 이 자료의 화면은 발표자 PC가 자동 모드(화면 아래 <code>auto mode on</code>)여서 이 질문 없이 진행됐습니다. 여러분 화면에는 질문이 몇 번 더 나옵니다.</p>
+</section>
+
+<section class="step plain" id="prep-e">
+  <h2><span class="n">E</span>폴더 구성: 자료는 따로, 프로젝트는 그 자료를 가리키게</h2>
+  <p>두 자료 모두 아래 구성을 씁니다. <code>실습</code> 폴더는 원하는 곳에 만들면 됩니다. 이 자료의 화면은 <code>E:\AI_Work\261027_KLEI_AI_Lecture\실습</code>에서 찍었습니다.</p>
+<pre class="tree">실습\
+├─ 자료\
+│   └─ nemotron-personas-korea\  <i>← 페르소나 원본 (파케이 파일 9개, 약 2GB)</i>
+├─ 도구\
+│   └─ riss\  <i>← riss_mcp.py, riss_key.txt (키)</i>
+├─ 가상응답자_실험\  <i>← 프로젝트 ①: CLAUDE.md, 설문지.md, 결과\</i>
+└─ 문헌조사\  <i>← 프로젝트 ②: CLAUDE.md, 결과\</i></pre>
+  <ul class="dots">
+    <li><strong>큰 원본은 한 곳에 한 번만.</strong> 2GB짜리 페르소나 자료를 프로젝트마다 복사하지 않고 <code>자료\</code>에 두고 같이 씁니다.</li>
+    <li><strong>위치는 CLAUDE.md에 적어 둡니다.</strong> 클로드 코드는 시작할 때 그 폴더의 <code>CLAUDE.md</code>를 먼저 읽습니다. 자료 경로와 작업 규칙을 적어 두면 매번 말하지 않아도 됩니다.</li>
+    <li><strong>원본은 읽기만.</strong> CLAUDE.md에 '고치거나 지우지 않는다'고 적어 둡니다. 결과는 프로젝트의 <code>결과\</code>에 쌓입니다.</li>
+    <li><strong>키는 도구 폴더에만.</strong> <code>riss_key.txt</code>는 메일, 단체 대화방, 깃허브 같은 곳에 올리지 않습니다.</li>
+    <li><strong>코덱스(ChatGPT)를 쓴다면</strong> 같은 내용을 <code>AGENTS.md</code>라는 이름으로 둡니다. 코덱스는 이 파일을 읽습니다.</li>
+  </ul>
+</section>
+
+<div class="next"><a href="persona/">따라 하기 ① 페르소나로 가상 설문 →</a><a href="riss/">따라 하기 ② RISS 연결 →</a></div>
+</main>
+
+<footer><div class="wrap">
+  <p>발표자료: <a href="../">AI 에이전트와 교육 연구</a> (2026. 10. 27.)</p>
+  <p>화면은 2026년 10월 27일 Windows 11, Claude Code 2.1.311에서 찍었습니다. 메뉴 이름과 화면 모양은 바뀔 수 있습니다.</p>
+</div></footer>
+<script src="asset/guide.js"></script>
+</body>
+</html>

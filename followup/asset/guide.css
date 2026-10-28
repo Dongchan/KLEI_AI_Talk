@@ -119,6 +119,11 @@ footer{border-top:1px solid var(--card-line);margin-top:20px;padding:26px 0 48px
 footer p{margin:4px 0}
 .next{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 18px;font-size:15px}
 
+/* 100%-scale screens: KoPub Dotum is almost unhinted, so 14-19px text renders uneven there. Draw the page at 125%,
+   which puts body text near the deck's smallest on-screen size (21px). High-DPI screens and phones already render it smoothly. */
+@media screen and (min-width:900px) and (max-resolution:1.2dppx){
+  html{zoom:1.25}
+}
 @media (max-width:640px){
   body{font-size:16px}
   .wrap{padding:0 16px}
